@@ -51,7 +51,7 @@ export async function analyzeItem(
       componentAddress,
       libAddressManager: libAddressManagerLocal,
       componentContract: componentContract as AnalyzedAddress,
-      ...Object.fromEntries(parameters.map((x) => [x.name, x.value])),
+      parameters: Object.fromEntries(parameters.map((x) => [x.name, x.value])),
     },
   }
 }
