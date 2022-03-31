@@ -15,9 +15,9 @@ const API_URL = 'https://api.coingecko.com/api/v3'
 
 export class CoingeckoClient {
   private rateLimiter = new RateLimiter({
-    callsPerMinute: 40,
+    callsPerMinute: 35,
   })
-  private timeoutMs = 10_000
+  private timeoutMs = 60_000
 
   constructor(private httpClient: HttpClient) {
     this.query = this.rateLimiter.wrap(this.query.bind(this))

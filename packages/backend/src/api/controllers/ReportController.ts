@@ -11,6 +11,7 @@ import {
 export interface ReportOutput {
   aggregate: Chart
   byProject: Record<string, ProjectData>
+  experimental: Record<string, string>
 }
 
 interface InnerReport {
@@ -154,6 +155,7 @@ function initOutput(projects: ProjectInfo[]): ReportOutput {
   const result: ReportOutput = {
     aggregate: { types: ['date', 'usd', 'eth'], data: [] },
     byProject: {}, //generateBYProject
+    experimental: {}
   }
 
   for (const project of projects) {
