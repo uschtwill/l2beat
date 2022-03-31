@@ -3,6 +3,7 @@ import {
   CoingeckoId,
   EthereumAddress,
   mock,
+  SimpleDate,
   UnixTime,
 } from '@l2beat/common'
 import { TokenInfo } from '@l2beat/config'
@@ -99,9 +100,9 @@ describe(ReportController.name, () => {
         aggregate: {
           types: ['date', 'usd', 'eth'],
           data: [
-            [START.add(-2, 'days').toString(), 1000000, 0.1],
-            [START.add(-1, 'days').toString(), 1000000, 0.1],
-            [START.toString(), 1000000, 0.1],
+            [getKey(START.add(-2, 'days')), 1000000, 0.1],
+            [getKey(START.add(-1, 'days')), 1000000, 0.1],
+            [getKey(START), 1000000, 0.1],
           ],
         },
         byProject: {
@@ -110,9 +111,9 @@ describe(ReportController.name, () => {
             aggregate: {
               types: ['date', 'usd', 'eth'],
               data: [
-                [START.add(-2, 'days').toString(), 1000000, 0.1],
-                [START.add(-1, 'days').toString(), 1000000, 0.1],
-                [START.toString(), 1000000, 0.1],
+                [getKey(START.add(-2, 'days')), 1000000, 0.1],
+                [getKey(START.add(-1, 'days')), 1000000, 0.1],
+                [getKey(START), 1000000, 0.1],
               ],
             },
             byToken: {
@@ -120,9 +121,9 @@ describe(ReportController.name, () => {
                 //TokenInfo.symbol
                 types: ['date', 'usd', 'eth'],
                 data: [
-                  [START.add(-2, 'days').toString(), 1000000, 0.1],
-                  [START.add(-1, 'days').toString(), 1000000, 0.1],
-                  [START.toString(), 1000000, 0.1],
+                  [getKey(START.add(-2, 'days')), 1000000, 0.1],
+                  [getKey(START.add(-1, 'days')), 1000000, 0.1],
+                  [getKey(START), 1000000, 0.1],
                 ],
               },
             },
@@ -215,7 +216,9 @@ describe(ReportController.name, () => {
           id: AssetId('uni-uniswap'),
           name: 'Uniswap',
           coingeckoId: CoingeckoId('uniswap'),
-          address: EthereumAddress('0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'),
+          address: EthereumAddress(
+            '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'
+          ),
           symbol: 'UNI',
           decimals: 18,
           sinceBlock: 10861674,
@@ -260,9 +263,9 @@ describe(ReportController.name, () => {
         aggregate: {
           types: ['date', 'usd', 'eth'],
           data: [
-            [START.add(-2, 'days').toString(), 3000000, 0.3],
-            [START.add(-1, 'days').toString(), 3000000, 0.3],
-            [START.toString(), 3000000, 0.3],
+            [getKey(START.add(-2, 'days')), 3000000, 0.3],
+            [getKey(START.add(-1, 'days')), 3000000, 0.3],
+            [getKey(START), 3000000, 0.3],
           ],
         },
         byProject: {
@@ -271,9 +274,9 @@ describe(ReportController.name, () => {
             aggregate: {
               types: ['date', 'usd', 'eth'],
               data: [
-                [START.add(-2, 'days').toString(), 1000000, 0.1],
-                [START.add(-1, 'days').toString(), 1000000, 0.1],
-                [START.toString(), 1000000, 0.1],
+                [getKey(START.add(-2, 'days')), 1000000, 0.1],
+                [getKey(START.add(-1, 'days')), 1000000, 0.1],
+                [getKey(START), 1000000, 0.1],
               ],
             },
             byToken: {
@@ -281,9 +284,9 @@ describe(ReportController.name, () => {
                 //TokenInfo.symbol
                 types: ['date', 'usd', 'eth'],
                 data: [
-                  [START.add(-2, 'days').toString(), 1000000, 0.1],
-                  [START.add(-1, 'days').toString(), 1000000, 0.1],
-                  [START.toString(), 1000000, 0.1],
+                  [getKey(START.add(-2, 'days')), 1000000, 0.1],
+                  [getKey(START.add(-1, 'days')), 1000000, 0.1],
+                  [getKey(START), 1000000, 0.1],
                 ],
               },
             },
@@ -293,9 +296,9 @@ describe(ReportController.name, () => {
             aggregate: {
               types: ['date', 'usd', 'eth'],
               data: [
-                [START.add(-2, 'days').toString(), 2000000, 0.2],
-                [START.add(-1, 'days').toString(), 2000000, 0.2],
-                [START.toString(), 2000000, 0.2],
+                [getKey(START.add(-2, 'days')), 2000000, 0.2],
+                [getKey(START.add(-1, 'days')), 2000000, 0.2],
+                [getKey(START), 2000000, 0.2],
               ],
             },
             byToken: {
@@ -303,9 +306,9 @@ describe(ReportController.name, () => {
                 //TokenInfo.symbol
                 types: ['date', 'usd', 'eth'],
                 data: [
-                  [START.add(-2, 'days').toString(), 2000000, 0.2],
-                  [START.add(-1, 'days').toString(), 2000000, 0.2],
-                  [START.toString(), 2000000, 0.2],
+                  [getKey(START.add(-2, 'days')), 2000000, 0.2],
+                  [getKey(START.add(-1, 'days')), 2000000, 0.2],
+                  [getKey(START), 2000000, 0.2],
                 ],
               },
             },
@@ -341,3 +344,7 @@ describe(ReportController.name, () => {
     })
   })
 })
+
+function getKey(timestamp: UnixTime) {
+  return SimpleDate.fromUnixTimestamp(timestamp.toNumber()).toString()
+}

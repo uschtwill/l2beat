@@ -1,5 +1,4 @@
-import { UnixTime } from '@l2beat/common'
-import { AssetId, EthereumAddress } from '@l2beat/common'
+import { AssetId, EthereumAddress, SimpleDate, UnixTime } from '@l2beat/common'
 
 import { ProjectInfo } from '../../model/ProjectInfo'
 import { Token } from '../../model/Token'
@@ -24,6 +23,7 @@ interface InnerReport {
   >
 }
 
+//TODO discuss logging
 export class ReportController {
   private projectNameByAddress = new Map<EthereumAddress, string>()
   private tokenSymbolByAssetId = new Map<AssetId, string>()
@@ -51,9 +51,6 @@ export class ReportController {
     const output = initOutput(this.projects)
     const reports = await this.reportRepository.getDaily()
 
-    let arbitrumSum = 0
-    let arbitrumEth = 0
-
     for (const report of reports) {
       const project = this.projectNameByAddress.get(report.bridge) ?? ''
       const token = this.tokenSymbolByAssetId.get(report.asset) ?? ''
@@ -62,50 +59,25 @@ export class ReportController {
         continue
       }
 
-      if (
-        report.blockNumber === 14480207n &&
-        report.bridge ===
-          EthereumAddress('0xa3A7B6F88361F48403514059F1F16C8E78d60EeC')
-      ) {
-        arbitrumSum += asNumber(report.usdTVL, 2)
-        arbitrumEth += asNumber(report.ethTVL, 6)
-      }
-
       const byTimestamp = getByTimestamp(aggregate, report)
-      aggregate.byTimestamp.set(report.timestamp.toString(), byTimestamp)
+      aggregate.byTimestamp.set(getKey(report.timestamp), byTimestamp)
 
       const byProject = getByProject(aggregate, project, report)
       aggregate.byProject
         .get(project)
-        ?.byTimestamp.set(report.timestamp.toString(), byProject)
+        ?.byTimestamp.set(getKey(report.timestamp), byProject)
 
       const byToken = getByToken(output, project, token, report)
       output.byProject[project].byToken[token] = byToken
-
-      // if (
-      //   report.blockNumber === 14490619n &&
-      //   report.bridge ===
-      //     EthereumAddress('0xa3A7B6F88361F48403514059F1F16C8E78d60EeC')
-      // ) {
-      //   console.log(token, report.usdTVL, report.ethTVL)
-      // }
     }
 
-    // console.log('Arbitrum USD: ', arbitrumSum)
-    // console.log('Arbitrum ETH: ', arbitrumEth)
-
     output.aggregate.data = getAggregate(aggregate)
-    console.log(output.aggregate.data)
 
     for (const project of this.projects) {
       output.byProject[project.name].aggregate.data = getAggregateByProject(
         aggregate,
         project.name
       )
-      // console.log(
-      //   project.name,
-      //   output.byProject[project.name].aggregate.data[1]
-      // )
     }
     return output
   }
@@ -118,7 +90,7 @@ function getByProject(
 ) {
   const byProject = aggregate.byProject
     .get(project)
-    ?.byTimestamp.get(report.timestamp.toString()) ?? { usd: 0n, eth: 0n }
+    ?.byTimestamp.get(getKey(report.timestamp)) ?? { usd: 0n, eth: 0n }
 
   return {
     usd: byProject.usd + report.usdTVL,
@@ -127,14 +99,19 @@ function getByProject(
 }
 
 function getByTimestamp(aggregate: InnerReport, report: ReportRecord) {
-  const byTimestamp = aggregate.byTimestamp.get(
-    report.timestamp.toString()
-  ) ?? { usd: 0n, eth: 0n }
+  const byTimestamp = aggregate.byTimestamp.get(getKey(report.timestamp)) ?? {
+    usd: 0n,
+    eth: 0n,
+  }
 
   return {
     usd: byTimestamp.usd + report.usdTVL,
     eth: byTimestamp.eth + report.ethTVL,
   }
+}
+
+function getKey(timestamp: UnixTime) {
+  return SimpleDate.fromUnixTimestamp(timestamp.add(-1,'days').toNumber()).toString()
 }
 
 function getByToken(
@@ -150,7 +127,7 @@ function getByToken(
   }
 
   byToken.data.push([
-    report.timestamp.toString(),
+    getKey(report.timestamp),
     asNumber(report.usdTVL, 2),
     asNumber(report.ethTVL, 6),
   ])
