@@ -2,6 +2,7 @@ import { CoingeckoClient, HttpClient, Logger } from '@l2beat/common'
 
 import { ApiServer } from './api/ApiServer'
 import { BlocksController } from './api/controllers/BlocksController'
+import { ReportController } from './api/controllers/ReportController'
 import { createBlocksRouter } from './api/routers/BlocksRouter'
 import { Config } from './config'
 import { BalanceUpdater } from './core/BalanceUpdater'
@@ -98,6 +99,12 @@ export class Application {
 
     const blocksController = new BlocksController(blockNumberRepository)
 
+    const reportController = new ReportController(
+      reportRepository,
+      config.projects,
+      config.tokens
+    )
+
     const apiServer = new ApiServer(config.port, logger, [
       createBlocksRouter(blocksController),
     ])
@@ -112,6 +119,8 @@ export class Application {
       await apiServer.listen()
 
       syncScheduler.start()
+
+      await reportController.getDaily()
     }
   }
 }
