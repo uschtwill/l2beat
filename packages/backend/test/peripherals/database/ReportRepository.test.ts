@@ -19,7 +19,7 @@ describe(ReportRepository.name, () => {
   const MOCK_USD_TVL = 100000000n
   const MOCK_ETH_TVL = 100000n
 
-  const START = UnixTime.now()
+  const START = UnixTime.now().toStartOf('day')
 
   const DATA: ReportRecord[] = [
     {
@@ -43,6 +43,59 @@ describe(ReportRepository.name, () => {
   beforeEach(async () => {
     await repository.deleteAll()
     await repository.addOrUpdate(DATA)
+  })
+
+  describe(ReportRepository.prototype.getDaily.name, () => {
+    it('filters data to get only full days', async () => {
+      const result = await repository.getDaily()
+
+      expect(result).toBeAnArrayWith(DATA[0])
+      expect(result).toBeAnArrayOfLength(1)
+    })
+
+    it('returns sorted data', async () => {
+      const unsortedData = [
+        {
+          blockNumber: START_BLOCK_NUMBER + 1000n,
+          timestamp: START.add(1, 'days'),
+          bridge: MOCK_BRIDGE,
+          asset: MOCK_ASSET,
+          usdTVL: MOCK_USD_TVL,
+          ethTVL: MOCK_ETH_TVL,
+        },
+        {
+          blockNumber: START_BLOCK_NUMBER - 1000n,
+          timestamp: START.add(-1, 'days'),
+          bridge: MOCK_BRIDGE,
+          asset: MOCK_ASSET,
+          usdTVL: MOCK_USD_TVL,
+          ethTVL: MOCK_ETH_TVL,
+        },
+        {
+          blockNumber: START_BLOCK_NUMBER - 2000n,
+          timestamp: START.add(-2, 'days'),
+          bridge: MOCK_BRIDGE,
+          asset: MOCK_ASSET,
+          usdTVL: MOCK_USD_TVL,
+          ethTVL: MOCK_ETH_TVL,
+        },
+      ]
+
+      await repository.addOrUpdate(unsortedData)
+
+      const result = await repository.getDaily()
+
+      expect(result).toEqual(
+        [-2, -1, 0, 1].map((offset) => ({
+          blockNumber: START_BLOCK_NUMBER + BigInt(offset) * 1000n,
+          timestamp: START.add(offset, 'days'),
+          bridge: MOCK_BRIDGE,
+          asset: MOCK_ASSET,
+          usdTVL: MOCK_USD_TVL,
+          ethTVL: MOCK_ETH_TVL,
+        }))
+      )
+    })
   })
 
   describe(ReportRepository.prototype.addOrUpdate.name, () => {

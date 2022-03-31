@@ -16,6 +16,18 @@ export class ReportRepository {
     this.logger = this.logger.for(this)
   }
 
+  async getDaily(): Promise<ReportRecord[]> {
+    const rows = await this.knex('reports').select()
+    return rows
+      .map(toRecord)
+      .filter((r) => r.timestamp.isFull('day'))
+      .sort((a, b) => {
+        if (a.timestamp.lt(b.timestamp)) return -1
+        else if (a.timestamp.equals(b.timestamp)) return 0
+        else return 1
+      })
+  }
+
   async getAll(): Promise<ReportRecord[]> {
     const rows = await this.knex('reports').select()
     return rows.map(toRecord)
