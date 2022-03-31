@@ -20,7 +20,7 @@ export function getLocalConfig(): Config {
     databaseUrl: getEnv('LOCAL_DB_URL'),
     core: {
       // TODO: This should probably be configurable
-      minBlockTimestamp: UnixTime.now().add(-2, 'hours').toStartOf('hour'),
+      minBlockTimestamp: UnixTime.now().add(-1, 'days').toStartOf('day'),
       safeBlockRefreshIntervalMs: 30 * 1000,
       safeBlockBlockOffset: 100n,
     },
