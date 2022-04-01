@@ -119,8 +119,6 @@ export class Application {
       await apiServer.listen()
 
       syncScheduler.start()
-
-      await reportController.getDaily()
     }
   }
 }

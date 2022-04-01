@@ -22,7 +22,8 @@
     "build:mock": "MOCK_DATA=true yarn build",
     "ci:check": "yarn clean && yarn build:mock && yarn format && yarn lint && yarn typecheck && yarn test",
     "fix": "yarn lint:fix && yarn format:fix",
-    "clean": "wsrun -ecsm clean"
+    "clean": "wsrun -ecsm clean",
+    "start": "cd packages/backend && yarn start"
   },
   "devDependencies": {
     "@sinonjs/fake-timers": "^7.1.2",
