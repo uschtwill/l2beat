@@ -5,8 +5,8 @@
   "main": "./build/data.json",
   "types": "./index.d.ts",
   "scripts": {
-    "build": "yarn build:mock",
-    "build:mock": "MOCK_DATA=true yarn build",
+    "build": "MOCK_DATA=true node -r esbuild-register src/old",
+    "build:mock": "yarn build",
     "build:precomputed": "UPDATE_PRECOMPUTED=true yarn build",
     "start": "node -r esbuild-register src",
     "format": "prettier --check .",
