@@ -120,7 +120,7 @@ export class Application {
 
       await apiServer.listen()
 
-      // syncScheduler.start()
+      syncScheduler.start()
     }
   }
 }
