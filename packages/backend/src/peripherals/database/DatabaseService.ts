@@ -10,10 +10,10 @@ export class DatabaseService {
     this.logger = this.logger.for(this)
   }
 
-  static createKnexInstance(databaseUrl: string) {
+  static createKnexInstance(connection: string | Knex.StaticConnectionConfig) {
     return KnexConstructor({
       client: 'pg',
-      connection: databaseUrl,
+      connection,
       migrations: {
         directory: path.join(__dirname, 'migrations'),
       },
