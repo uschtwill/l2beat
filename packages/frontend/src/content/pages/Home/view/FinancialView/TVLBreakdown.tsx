@@ -59,6 +59,7 @@ const GAP_SIZE = 2
 const MIN_SIZE = 2
 
 function getGradientGroups(breakdown: TVLBreakdownProps) {
+  return []
   if (breakdown.empty) {
     return []
   }

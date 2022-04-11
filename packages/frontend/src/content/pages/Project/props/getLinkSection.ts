@@ -20,14 +20,10 @@ export function getLinkSection(
   const stats: LinkSectionProps['experimentalStats7d'] = {
     visible: true,
     showExcludingEth: showNoEth,
-    inflows: showInflowsOutflows
-      ? formatUSD(experimental.usdIn7DayNoEth)
-      : undefined,
-    outflows: showInflowsOutflows
-      ? formatUSD(experimental.usdOut7DayNoEth)
-      : undefined,
-    batchCount: experimental.batchCount7d,
-    transactionCount: experimental.messageCount7d,
+    inflows: undefined,
+    outflows: undefined,
+    batchCount: undefined,
+    transactionCount: undefined,
   }
 
   stats.visible =
