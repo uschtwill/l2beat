@@ -5,7 +5,7 @@
   "main": "./build/data.json",
   "types": "./index.d.ts",
   "scripts": {
-    "build": "MOCK_DATA=true node -r esbuild-register src/old",
+    "build": "tsc",
     "build:mock": "yarn build",
     "build:precomputed": "UPDATE_PRECOMPUTED=true yarn build",
     "start": "node -r esbuild-register src",

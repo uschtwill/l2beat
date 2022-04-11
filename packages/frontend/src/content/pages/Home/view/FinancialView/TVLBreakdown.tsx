@@ -59,7 +59,6 @@ const GAP_SIZE = 2
 const MIN_SIZE = 2
 
 function getGradientGroups(breakdown: TVLBreakdownProps) {
-  return []
   if (breakdown.empty) {
     return []
   }
@@ -68,7 +67,8 @@ function getGradientGroups(breakdown: TVLBreakdownProps) {
     { weight: breakdown.ether, color: 'var(--gradient-1)' },
     { weight: breakdown.stable, color: 'var(--gradient-2)' },
     { weight: breakdown.other, color: 'var(--gradient-4)' },
-  ].filter((x) => x.weight >= 0.005)
+  ]
+  // .filter((x) => x.weight >= 0.005)
   const gaps = groups.length - 1
   const sizedGroups = groups.map((g) => ({
     ...g,

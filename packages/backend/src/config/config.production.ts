@@ -19,7 +19,7 @@ export function getProductionConfig(): Config {
     core: {
       // TODO: set minimum timestamp from when to fetch prices
       //right now it is the earliest fetched date from previous backend
-      minBlockTimestamp: UnixTime.fromDate(new Date('2019-11-14T00:00:00Z')),
+      minBlockTimestamp: UnixTime.now().add(-1, 'days').toStartOf('day'),
       safeBlockRefreshIntervalMs: 5 * 60 * 1000,
       safeBlockBlockOffset: 100n,
     },

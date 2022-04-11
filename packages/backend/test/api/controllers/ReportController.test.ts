@@ -129,6 +129,7 @@ describe(ReportController.name, () => {
             },
           },
         },
+        experimental:{}
       })
     })
 
@@ -314,6 +315,7 @@ describe(ReportController.name, () => {
             },
           },
         },
+        experimental:{}
       })
     })
   })

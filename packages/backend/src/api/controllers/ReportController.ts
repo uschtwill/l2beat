@@ -70,6 +70,10 @@ export class ReportController {
 
       const byToken = getByToken(output, project, token, report)
       output.byProject[project].byToken[token] = byToken
+
+      if(token === 'ETH' && project === 'Arbitrum') {
+        console.log(byToken)
+      }
     }
 
     output.aggregate.data = getAggregate(aggregate)
@@ -123,14 +127,15 @@ function getByToken(
 ) {
   const byToken = output.byProject[project].byToken[token] ?? {
     //TokenInfo.symbol
-    types: ['date', 'usd', 'eth'],
+    types: ['date', 'eth', 'usd'],
     data: [],
   }
+  //jak jest kilka pooli to sie ponadpisuje i będą zera itp
 
   byToken.data.push([
     getKey(report.timestamp),
-    asNumber(report.usdTVL, 2),
     asNumber(report.ethTVL, 6),
+    asNumber(report.usdTVL, 2),
   ])
   return byToken
 }
