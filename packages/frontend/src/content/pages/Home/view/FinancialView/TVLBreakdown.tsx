@@ -68,7 +68,7 @@ function getGradientGroups(breakdown: TVLBreakdownProps) {
     { weight: breakdown.stable, color: 'var(--gradient-2)' },
     { weight: breakdown.other, color: 'var(--gradient-4)' },
   ]
-  // .filter((x) => x.weight >= 0.005)
+  .filter((x) => x.weight >= 0.005)
   const gaps = groups.length - 1
   const sizedGroups = groups.map((g) => ({
     ...g,

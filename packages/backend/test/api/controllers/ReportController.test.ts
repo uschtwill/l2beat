@@ -16,6 +16,7 @@ import {
 import {
   ReportRecord,
   ReportRepository,
+  ReportWithBalance,
 } from '../../../src/peripherals/database/ReportRepository'
 
 describe(ReportController.name, () => {
@@ -31,7 +32,7 @@ describe(ReportController.name, () => {
 
       const START = UnixTime.now().toStartOf('day')
 
-      const DATA: ReportRecord[] = [
+      const DATA: ReportWithBalance[] = [
         {
           blockNumber: START_BLOCK_NUMBER - 2000n,
           timestamp: START.add(-2, 'days'),
@@ -39,6 +40,8 @@ describe(ReportController.name, () => {
           asset: MOCK_ASSET,
           usdTVL: MOCK_USD_TVL,
           ethTVL: MOCK_ETH_TVL,
+          balance: 1000000123456n * 10n ** BigInt(18 - 6)
+
         },
         {
           blockNumber: START_BLOCK_NUMBER - 1000n,
@@ -47,6 +50,8 @@ describe(ReportController.name, () => {
           asset: MOCK_ASSET,
           usdTVL: MOCK_USD_TVL,
           ethTVL: MOCK_ETH_TVL,
+          balance: 1000000123456n * 10n ** BigInt(18 - 6)
+
         },
         {
           blockNumber: START_BLOCK_NUMBER,
@@ -55,6 +60,8 @@ describe(ReportController.name, () => {
           asset: MOCK_ASSET,
           usdTVL: MOCK_USD_TVL,
           ethTVL: MOCK_ETH_TVL,
+          balance: 1000000123456n * 10n ** BigInt(18 - 6)
+
         },
       ]
 
@@ -119,17 +126,17 @@ describe(ReportController.name, () => {
             byToken: {
               ['DAI']: {
                 //TokenInfo.symbol
-                types: ['date', 'usd', 'eth'],
+                types: ['date', 'dai', 'usd'],
                 data: [
-                  [getKey(START.add(-2, 'days')), 1000000, 0.1],
-                  [getKey(START.add(-1, 'days')), 1000000, 0.1],
-                  [getKey(START), 1000000, 0.1],
+                  [getKey(START.add(-2, 'days')), 1000000.123456, 1000000],
+                  [getKey(START.add(-1, 'days')), 1000000.123456, 1000000],
+                  [getKey(START), 1000000.123456, 1000000],
                 ],
               },
             },
           },
         },
-        experimental:{}
+        experimental: {},
       })
     })
 
@@ -149,7 +156,7 @@ describe(ReportController.name, () => {
 
       const START = UnixTime.now().toStartOf('day')
 
-      const DATA: ReportRecord[] = [
+      const DATA: ReportWithBalance[] = [
         {
           blockNumber: START_BLOCK_NUMBER - 2000n,
           timestamp: START.add(-2, 'days'),
@@ -157,22 +164,7 @@ describe(ReportController.name, () => {
           asset: MOCK_ASSET,
           usdTVL: MOCK_USD_TVL,
           ethTVL: MOCK_ETH_TVL,
-        },
-        {
-          blockNumber: START_BLOCK_NUMBER - 1000n,
-          timestamp: START.add(-1, 'days'),
-          bridge: MOCK_BRIDGE,
-          asset: MOCK_ASSET,
-          usdTVL: MOCK_USD_TVL,
-          ethTVL: MOCK_ETH_TVL,
-        },
-        {
-          blockNumber: START_BLOCK_NUMBER,
-          timestamp: START,
-          bridge: MOCK_BRIDGE,
-          asset: MOCK_ASSET,
-          usdTVL: MOCK_USD_TVL,
-          ethTVL: MOCK_ETH_TVL,
+          balance: 1000000123456n * 10n ** BigInt(18 - 6)
         },
         {
           blockNumber: START_BLOCK_NUMBER - 2000n,
@@ -181,6 +173,16 @@ describe(ReportController.name, () => {
           asset: MOCK_ASSET_2,
           usdTVL: MOCK_USD_TVL_2,
           ethTVL: MOCK_ETH_TVL_2,
+          balance: 20000123456n * 10n ** BigInt(18 - 6),
+        },
+        {
+          blockNumber: START_BLOCK_NUMBER - 1000n,
+          timestamp: START.add(-1, 'days'),
+          bridge: MOCK_BRIDGE,
+          asset: MOCK_ASSET,
+          usdTVL: MOCK_USD_TVL,
+          ethTVL: MOCK_ETH_TVL,
+          balance: 1000000123456n * 10n ** BigInt(18 - 6),
         },
         {
           blockNumber: START_BLOCK_NUMBER - 1000n,
@@ -189,6 +191,17 @@ describe(ReportController.name, () => {
           asset: MOCK_ASSET_2,
           usdTVL: MOCK_USD_TVL_2,
           ethTVL: MOCK_ETH_TVL_2,
+          balance: 20000123456n * 10n ** BigInt(18 - 6),
+        },
+        {
+          blockNumber: START_BLOCK_NUMBER,
+          timestamp: START,
+          bridge: MOCK_BRIDGE,
+          asset: MOCK_ASSET,
+          usdTVL: MOCK_USD_TVL,
+          ethTVL: MOCK_ETH_TVL,
+          balance: 1000000123456n * 10n ** BigInt(18 - 6),
+          
         },
         {
           blockNumber: START_BLOCK_NUMBER,
@@ -197,6 +210,7 @@ describe(ReportController.name, () => {
           asset: MOCK_ASSET_2,
           usdTVL: MOCK_USD_TVL_2,
           ethTVL: MOCK_ETH_TVL_2,
+          balance: 20000123456n * 10n ** BigInt(18 - 6),
         },
       ]
 
@@ -283,11 +297,11 @@ describe(ReportController.name, () => {
             byToken: {
               ['DAI']: {
                 //TokenInfo.symbol
-                types: ['date', 'usd', 'eth'],
+                types: ['date', 'dai', 'usd'],
                 data: [
-                  [getKey(START.add(-2, 'days')), 1000000, 0.1],
-                  [getKey(START.add(-1, 'days')), 1000000, 0.1],
-                  [getKey(START), 1000000, 0.1],
+                  [getKey(START.add(-2, 'days')), 1000000.123456, 1000000],
+                  [getKey(START.add(-1, 'days')), 1000000.123456, 1000000],
+                  [getKey(START), 1000000.123456, 1000000],
                 ],
               },
             },
@@ -305,17 +319,166 @@ describe(ReportController.name, () => {
             byToken: {
               ['UNI']: {
                 //TokenInfo.symbol
-                types: ['date', 'usd', 'eth'],
+                types: ['date', 'uni', 'usd'],
                 data: [
-                  [getKey(START.add(-2, 'days')), 2000000, 0.2],
-                  [getKey(START.add(-1, 'days')), 2000000, 0.2],
-                  [getKey(START), 2000000, 0.2],
+                  [getKey(START.add(-2, 'days')), 20000.123456, 2000000],
+                  [getKey(START.add(-1, 'days')), 20000.123456, 2000000],
+                  [getKey(START), 20000.123456, 2000000],
                 ],
               },
             },
           },
         },
-        experimental:{}
+        experimental: {},
+      })
+    })
+
+    it('multiple bridges', async () => {
+      const START_BLOCK_NUMBER = 123456n
+      const MOCK_BRIDGE = EthereumAddress(
+        '0x011B6E24FfB0B5f5fCc564cf4183C5BBBc96D515'
+      )
+      const MOCK_BRIDGE_2 = EthereumAddress.random()
+      const MOCK_ASSET = AssetId('dai-dai-stablecoin')
+      const MOCK_USD_TVL = 100000000n
+      const MOCK_ETH_TVL = 100000n
+
+      const START = UnixTime.now().toStartOf('day')
+
+      const DATA: ReportWithBalance[] = [
+        {
+          blockNumber: START_BLOCK_NUMBER - 2000n,
+          timestamp: START.add(-2, 'days'),
+          bridge: MOCK_BRIDGE,
+          asset: MOCK_ASSET,
+          usdTVL: MOCK_USD_TVL,
+          ethTVL: MOCK_ETH_TVL,
+          balance: 1000000111111n * 10n ** BigInt(18 - 6)
+        },
+        {
+          blockNumber: START_BLOCK_NUMBER - 2000n,
+          timestamp: START.add(-2, 'days'),
+          bridge: MOCK_BRIDGE_2,
+          asset: MOCK_ASSET,
+          usdTVL: MOCK_USD_TVL,
+          ethTVL: MOCK_ETH_TVL,
+          balance: 1000000111111n * 10n ** BigInt(18 - 6)
+        },
+        {
+          blockNumber: START_BLOCK_NUMBER - 1000n,
+          timestamp: START.add(-1, 'days'),
+          bridge: MOCK_BRIDGE,
+          asset: MOCK_ASSET,
+          usdTVL: MOCK_USD_TVL,
+          ethTVL: MOCK_ETH_TVL,
+          balance: 1000000111111n * 10n ** BigInt(18 - 6)
+        },
+        {
+          blockNumber: START_BLOCK_NUMBER - 1000n,
+          timestamp: START.add(-1, 'days'),
+          bridge: MOCK_BRIDGE_2,
+          asset: MOCK_ASSET,
+          usdTVL: MOCK_USD_TVL,
+          ethTVL: MOCK_ETH_TVL,
+          balance: 1000000111111n * 10n ** BigInt(18 - 6)
+        },
+        {
+          blockNumber: START_BLOCK_NUMBER,
+          timestamp: START,
+          bridge: MOCK_BRIDGE,
+          asset: MOCK_ASSET,
+          usdTVL: MOCK_USD_TVL,
+          ethTVL: MOCK_ETH_TVL,
+          balance: 1000000111111n * 10n ** BigInt(18 - 6)
+        },
+        {
+          blockNumber: START_BLOCK_NUMBER,
+          timestamp: START,
+          bridge: MOCK_BRIDGE_2,
+          asset: MOCK_ASSET,
+          usdTVL: MOCK_USD_TVL,
+          ethTVL: MOCK_ETH_TVL,
+          balance: 1000000111111n * 10n ** BigInt(18 - 6)
+        },
+      ]
+
+      const TOKENS: TokenInfo[] = [
+        {
+          id: AssetId('dai-dai-stablecoin'),
+          name: 'Dai Stablecoin',
+          coingeckoId: CoingeckoId('dai'),
+          address: EthereumAddress(
+            '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+          ),
+          symbol: 'DAI',
+          decimals: 18,
+          sinceBlock: 8950398,
+          category: 'stablecoin',
+        },
+      ]
+
+      const reportRepository = mock<ReportRepository>({
+        getDaily: mockFn().returns(DATA),
+      })
+
+      const reportController = new ReportController(
+        reportRepository,
+        [
+          {
+            name: 'Arbitrum',
+            bridges: [
+              {
+                address: MOCK_BRIDGE.toString(),
+                sinceBlock: 0,
+                tokens: TOKENS,
+              },
+              {
+                address: MOCK_BRIDGE_2.toString(),
+                sinceBlock: 0,
+                tokens: TOKENS,
+              },
+            ],
+          },
+        ],
+        TOKENS
+      )
+
+      const result = await reportController.getDaily()
+
+      expect(result).toEqual({
+        aggregate: {
+          types: ['date', 'usd', 'eth'],
+          data: [
+            [getKey(START.add(-2, 'days')), 2000000, 0.2],
+            [getKey(START.add(-1, 'days')), 2000000, 0.2],
+            [getKey(START), 2000000, 0.2],
+          ],
+        },
+        byProject: {
+          ['Arbitrum']: {
+            //Project.name
+            aggregate: {
+              types: ['date', 'usd', 'eth'],
+              data: [
+                [getKey(START.add(-2, 'days')), 2000000, 0.2],
+                [getKey(START.add(-1, 'days')), 2000000, 0.2],
+                [getKey(START), 2000000, 0.2],
+              ],
+            },
+            byToken: {
+              ['DAI']: {
+                //TokenInfo.symbol
+                types: ['date', 'dai', 'usd'],
+                data: [
+                  [getKey(START.add(-2, 'days')), 2000000.222222, 2000000],
+                  [getKey(START.add(-1, 'days')), 2000000.222222, 2000000],
+                  [getKey(START), 2000000.222222, 2000000],
+                ],
+              },
+            },
+          },
+        },
+        experimental: {},
       })
     })
   })
@@ -344,9 +507,27 @@ describe(ReportController.name, () => {
 
       expect(result).toEqual(0.01)
     })
+
+    it('100123456000000000000 || 18 precision digits', () => {
+      const result = asNumber(100123456000000000000n, 18)
+
+      expect(result).toEqual(100.123456)
+    })
+
+    it('123456000000000000 || 18 precision digits', () => {
+      const result = asNumber(123456000000000000n, 18)
+
+      expect(result).toEqual(0.123456)
+    })
+
+    it('123 || 0 precision digits', () => {
+      const result = asNumber(123n, 0)
+
+      expect(result).toEqual(123)
+    })
   })
 })
 
 function getKey(timestamp: UnixTime) {
-  return SimpleDate.fromUnixTimestamp(timestamp.toNumber()).toString()
+  return SimpleDate.fromUnixTimestamp(timestamp.add(-1,'days').toNumber()).toString()
 }

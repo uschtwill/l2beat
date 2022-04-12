@@ -6,6 +6,7 @@ import { Chart, ProjectData } from '../../old/tools/makeOutputData'
 import {
   ReportRecord,
   ReportRepository,
+  ReportWithBalance,
 } from '../../peripherals/database/ReportRepository'
 
 export interface ReportOutput {
@@ -24,10 +25,9 @@ interface InnerReport {
   >
 }
 
-//TODO discuss logging
 export class ReportController {
   private projectNameByAddress = new Map<EthereumAddress, string>()
-  private tokenSymbolByAssetId = new Map<AssetId, string>()
+  private tokenByAssetId = new Map<AssetId, Token>()
 
   constructor(
     private reportRepository: ReportRepository,
@@ -43,7 +43,7 @@ export class ReportController {
       }
     }
     for (const token of this.tokens) {
-      this.tokenSymbolByAssetId.set(token.id, token.symbol)
+      this.tokenByAssetId.set(token.id, token)
     }
   }
 
@@ -54,7 +54,7 @@ export class ReportController {
 
     for (const report of reports) {
       const project = this.projectNameByAddress.get(report.bridge) ?? ''
-      const token = this.tokenSymbolByAssetId.get(report.asset) ?? ''
+      const token = this.tokenByAssetId.get(report.asset) ?? ''
 
       if (!project || !token) {
         continue
@@ -69,11 +69,7 @@ export class ReportController {
         ?.byTimestamp.set(getKey(report.timestamp), byProject)
 
       const byToken = getByToken(output, project, token, report)
-      output.byProject[project].byToken[token] = byToken
-
-      if(token === 'ETH' && project === 'Arbitrum') {
-        console.log(byToken)
-      }
+      output.byProject[project].byToken[token.symbol] = byToken
     }
 
     output.aggregate.data = getAggregate(aggregate)
@@ -83,6 +79,12 @@ export class ReportController {
         aggregate,
         project.name
       )
+
+      for (const key in output.byProject[project.name].byToken) {
+        const byToken = output.byProject[project.name].byToken[key]
+        output.byProject[project.name].byToken[key].data =
+          aggregateByToken(byToken)
+      }
     }
     return output
   }
@@ -116,25 +118,27 @@ function getByTimestamp(aggregate: InnerReport, report: ReportRecord) {
 }
 
 function getKey(timestamp: UnixTime) {
-  return SimpleDate.fromUnixTimestamp(timestamp.add(-1,'days').toNumber()).toString()
+  return SimpleDate.fromUnixTimestamp(
+    timestamp.add(-1, 'days').toNumber()
+  ).toString()
 }
 
 function getByToken(
   output: ReportOutput,
   project: string,
-  token: string,
-  report: ReportRecord
+  token: Token,
+  report: ReportWithBalance
 ) {
-  const byToken = output.byProject[project].byToken[token] ?? {
+  const byToken = output.byProject[project].byToken[token.symbol] ?? {
     //TokenInfo.symbol
-    types: ['date', 'eth', 'usd'],
+    types: ['date', token.symbol.toLocaleLowerCase(), 'usd'],
     data: [],
   }
   //jak jest kilka pooli to sie ponadpisuje i będą zera itp
 
   byToken.data.push([
     getKey(report.timestamp),
-    asNumber(report.ethTVL, 6),
+    +asNumber(report.balance, token.decimals).toFixed(6),
     asNumber(report.usdTVL, 2),
   ])
   return byToken
@@ -144,13 +148,13 @@ export function asNumber(value: bigint, precision: number) {
   const intPart = value / 10n ** BigInt(precision)
   const decimalPart = value - intPart * 10n ** BigInt(precision)
 
+  const zerosBefore = precision - decimalPart.toString().length
+
   return (
     Number(intPart) +
     Number(
       Number(
-        `0.${'0'.repeat(
-          precision - decimalPart.toString().length
-        )}${decimalPart}`
+        `0.${'0'.repeat(zerosBefore >= 0 ? zerosBefore : 0)}${decimalPart}`
       ).toFixed(precision)
     )
   )
@@ -160,7 +164,7 @@ function initOutput(projects: ProjectInfo[]): ReportOutput {
   const result: ReportOutput = {
     aggregate: { types: ['date', 'usd', 'eth'], data: [] },
     byProject: {}, //generateBYProject
-    experimental: {}
+    experimental: {},
   }
 
   for (const project of projects) {
@@ -222,5 +226,19 @@ function getAggregateByProject(
       ])
     }
   }
+  return result
+}
+function aggregateByToken(byToken: Chart): [string, number, number][] {
+  const result: [string, number, number][] = []
+
+  for (const d of byToken.data) {
+    if (result[result.length - 1] && result[result.length - 1][0] === d[0]) {
+      result[result.length - 1][1] += d[1]
+      result[result.length - 1][2] += d[2]
+    } else {
+      result.push(d)
+    }
+  }
+
   return result
 }
