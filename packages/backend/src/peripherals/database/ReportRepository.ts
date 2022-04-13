@@ -22,24 +22,43 @@ export class ReportRepository {
 
   async getDaily(): Promise<ReportWithBalance[]> {
     const rows = await this.knex('reports')
-      .select('reports.block_number', 'reports.unix_timestamp', 'reports.bridge_address', 'reports.asset_id', 'reports.usd_tvl', 'reports.eth_tvl', 'asset_balances.balance')
-      .leftJoin(
-        'asset_balances',
-        function() {
-          this.on('asset_balances.block_number', '=','reports.block_number')
-          .andOn('asset_balances.asset_id', '=','reports.asset_id')
-          .andOn('asset_balances.holder_address', '=','reports.bridge_address')
-        }
+      .select(
+        'reports.block_number',
+        'reports.unix_timestamp',
+        'reports.bridge_address',
+        'reports.asset_id',
+        'reports.usd_tvl',
+        'reports.eth_tvl',
+        'asset_balances.balance'
       )
+      .leftJoin('asset_balances', function () {
+        this.on('asset_balances.block_number', '=', 'reports.block_number')
+          .andOn('asset_balances.asset_id', '=', 'reports.asset_id')
+          .andOn('asset_balances.holder_address', '=', 'reports.bridge_address')
+      })
 
     return rows
-      .map((r) => ({ ...toRecord(r), balance: r.balance ? BigInt(r.balance) : BigInt(0) }))
+      .map((r) => ({
+        ...toRecord(r),
+        balance: r.balance ? BigInt(r.balance) : BigInt(0),
+      }))
       .filter((r) => r.timestamp.isFull('day'))
       .sort((a, b) => {
         if (a.timestamp.lt(b.timestamp)) return -1
         else if (a.timestamp.equals(b.timestamp)) return 0
         else return 1
       })
+  }
+
+  async getMaxByProject(): Promise<Map<string, UnixTime>> {
+    const rows = await this.knex('reports')
+      .max('unix_timestamp')
+      .select('bridge_address')
+      .groupBy('bridge_address')
+
+    return new Map(
+      rows.map((r) => [r.bridge_address, new UnixTime(+r.max)])
+    )
   }
 
   async getAll(): Promise<ReportRecord[]> {

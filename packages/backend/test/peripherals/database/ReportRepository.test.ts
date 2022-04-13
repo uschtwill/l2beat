@@ -1,7 +1,10 @@
 import { AssetId, EthereumAddress, Logger, UnixTime } from '@l2beat/common'
 import { expect } from 'earljs'
 
-import { BalanceRecord, BalanceRepository } from '../../../src/peripherals/database/BalanceRepository'
+import {
+  BalanceRecord,
+  BalanceRepository,
+} from '../../../src/peripherals/database/BalanceRepository'
 import {
   ReportRecord,
   ReportRepository,
@@ -56,19 +59,19 @@ describe(ReportRepository.name, () => {
       blockNumber: START_BLOCK_NUMBER,
       holderAddress: MOCK_BRIDGE,
       assetId: MOCK_ASSET,
-      balance: 100000000n
+      balance: 100000000n,
     },
     {
       blockNumber: START_BLOCK_NUMBER,
       holderAddress: MOCK_BRIDGE_2,
       assetId: MOCK_ASSET,
-      balance: 1000n
+      balance: 1000n,
     },
     {
       blockNumber: START_BLOCK_NUMBER + 100n,
       holderAddress: MOCK_BRIDGE,
       assetId: MOCK_ASSET,
-      balance: 100000000n
+      balance: 100000000n,
     },
   ]
 
@@ -77,14 +80,16 @@ describe(ReportRepository.name, () => {
     await repository.deleteAll()
     await repository.addOrUpdate(DATA)
     await balanceRepository.addOrUpdate(BALANCE_DATA)
-
   })
 
   describe(ReportRepository.prototype.getDaily.name, () => {
     it('filters data to get only full days', async () => {
       const result = await repository.getDaily()
 
-      expect(result).toBeAnArrayWith({...DATA[0], balance: 100000000n},{...DATA[1], balance: 1000n})
+      expect(result).toBeAnArrayWith(
+        { ...DATA[0], balance: 100000000n },
+        { ...DATA[1], balance: 1000n }
+      )
       expect(result).toBeAnArrayOfLength(2)
     })
 
@@ -121,17 +126,19 @@ describe(ReportRepository.name, () => {
           blockNumber: START_BLOCK_NUMBER + 1000n,
           holderAddress: MOCK_BRIDGE,
           assetId: MOCK_ASSET,
-          balance: 100000000n
-        },{
+          balance: 100000000n,
+        },
+        {
           blockNumber: START_BLOCK_NUMBER - 1000n,
           holderAddress: MOCK_BRIDGE,
           assetId: MOCK_ASSET,
-          balance: 100000000n
-        },{
+          balance: 100000000n,
+        },
+        {
           blockNumber: START_BLOCK_NUMBER - 2000n,
           holderAddress: MOCK_BRIDGE,
           assetId: MOCK_ASSET,
-          balance: 100000000n
+          balance: 100000000n,
         },
       ]
 
@@ -147,7 +154,7 @@ describe(ReportRepository.name, () => {
         asset: MOCK_ASSET,
         usdTVL: MOCK_USD_TVL,
         ethTVL: MOCK_ETH_TVL,
-        balance: 100000000n
+        balance: 100000000n,
       }))
 
       const bridgeTwoExpected = {
@@ -157,11 +164,27 @@ describe(ReportRepository.name, () => {
         asset: MOCK_ASSET,
         usdTVL: 1000n,
         ethTVL: 1n,
-        balance: 1000n
+        balance: 1000n,
       }
 
-      expect(result).toEqual([...bridgeExpected.slice(0,3), bridgeTwoExpected, bridgeExpected[3]])
+      expect(result).toEqual([
+        ...bridgeExpected.slice(0, 3),
+        bridgeTwoExpected,
+        bridgeExpected[3],
+      ])
+    })
+  })
 
+  describe(ReportRepository.prototype.getMaxByProject.name, () => {
+    it('multiple project and multiple records', async () => {
+      const result = await repository.getMaxByProject()
+
+      expect(result).toEqual(
+        new Map([
+          [MOCK_BRIDGE.toString(), START.add(1, 'hours')],
+          [MOCK_BRIDGE_2.toString(), START],
+        ])
+      )
     })
   })
 

@@ -47,6 +47,22 @@ export class ReportController {
     }
   }
 
+  async filterReports(): Promise<ReportWithBalance[]> {
+    const reports = await this.reportRepository.getDaily()
+
+    const maxByProject = await this.reportRepository.getMaxByProject()
+
+    const maxTimestamp = getMaxTimestamp(maxByProject)
+    const excludedProjects = getExcluded(maxByProject, maxTimestamp)
+
+    return reports.filter(report => {
+      if(report.timestamp > maxTimestamp || excludedProjects.includes(report.bridge)) {
+        return false
+      }
+      return true
+    })
+  }
+
   async getDaily(): Promise<ReportOutput> {
     const aggregate = initAggregate(this.projects)
     const output = initOutput(this.projects)
@@ -80,10 +96,9 @@ export class ReportController {
         project.name
       )
 
-      for (const key in output.byProject[project.name].byToken) {
+      for(const key in output.byProject[project.name].byToken) {
         const byToken = output.byProject[project.name].byToken[key]
-        output.byProject[project.name].byToken[key].data =
-          aggregateByToken(byToken)
+        output.byProject[project.name].byToken[key].data = aggregateByToken(byToken)
       }
     }
     return output
@@ -118,9 +133,7 @@ function getByTimestamp(aggregate: InnerReport, report: ReportRecord) {
 }
 
 function getKey(timestamp: UnixTime) {
-  return SimpleDate.fromUnixTimestamp(
-    timestamp.add(-1, 'days').toNumber()
-  ).toString()
+  return SimpleDate.fromUnixTimestamp(timestamp.add(-1,'days').toNumber()).toString()
 }
 
 function getByToken(
@@ -154,7 +167,9 @@ export function asNumber(value: bigint, precision: number) {
     Number(intPart) +
     Number(
       Number(
-        `0.${'0'.repeat(zerosBefore >= 0 ? zerosBefore : 0)}${decimalPart}`
+        `0.${'0'.repeat(
+          zerosBefore >= 0 ? zerosBefore : 0
+        )}${decimalPart}`
       ).toFixed(precision)
     )
   )
@@ -164,7 +179,7 @@ function initOutput(projects: ProjectInfo[]): ReportOutput {
   const result: ReportOutput = {
     aggregate: { types: ['date', 'usd', 'eth'], data: [] },
     byProject: {}, //generateBYProject
-    experimental: {},
+    experimental: {}
   }
 
   for (const project of projects) {
@@ -231,8 +246,8 @@ function getAggregateByProject(
 function aggregateByToken(byToken: Chart): [string, number, number][] {
   const result: [string, number, number][] = []
 
-  for (const d of byToken.data) {
-    if (result[result.length - 1] && result[result.length - 1][0] === d[0]) {
+  for(const d of byToken.data) {
+    if(result[result.length - 1] && result[result.length - 1][0] === d[0]) {
       result[result.length - 1][1] += d[1]
       result[result.length - 1][2] += d[2]
     } else {
@@ -241,4 +256,6 @@ function aggregateByToken(byToken: Chart): [string, number, number][] {
   }
 
   return result
+
 }
+
