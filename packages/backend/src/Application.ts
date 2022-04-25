@@ -108,7 +108,7 @@ export class Application {
 
     const apiServer = new ApiServer(config.port, logger, [
       createBlocksRouter(blocksController),
-      createReportRouter(reportController)
+      createReportRouter(reportController),
     ])
 
     /* - - - - - START - - - - - */

@@ -45,9 +45,13 @@ export class BalanceRepository {
       .onConflict(['block_number', 'holder_address', 'asset_id'])
       .merge()
 
-      if(balances.length > 0) {
-        this.logger.debug({ method: 'addOrUpdate', amount: rows.length, blockNumber: balances[0].blockNumber.toString() })
-      }
+    if (balances.length > 0) {
+      this.logger.debug({
+        method: 'addOrUpdate',
+        amount: rows.length,
+        blockNumber: balances[0].blockNumber.toString(),
+      })
+    }
   }
 
   async getAll(): Promise<BalanceRecord[]> {
