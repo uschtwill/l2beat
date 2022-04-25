@@ -11,6 +11,7 @@ import { expect, mockFn } from 'earljs'
 
 import {
   asNumber,
+  getExcluded,
   getReportDailyKey,
   getSyncedTimestamp,
   ReportController,
@@ -649,6 +650,23 @@ describe(getSyncedTimestamp.name, () => {
     const result = getSyncedTimestamp(MAX,MAX_BY_ASSET_IN_BRIDGE, 'daily')
 
     expect(result).toEqual(MAX)
+  })
+})
+
+describe(getExcluded.name, () => {
+  it("excludes out of sync assets in bridges", () => {
+    const SYNCED_TIMESTAMP = UnixTime.fromDate(new Date('2021-09-07T00:00:00Z'))
+  
+    const MAX_BY_ASSET_IN_BRIDGE = new Map([
+      ['0xA-tokenA', SYNCED_TIMESTAMP],
+      ['0xB-tokenA', SYNCED_TIMESTAMP.add(-1,'days')],
+      ['0xB-tokenB', SYNCED_TIMESTAMP],
+      ['0xC-tokenC', SYNCED_TIMESTAMP.add(-200, 'days')],
+    ])
+
+    const result = getExcluded(MAX_BY_ASSET_IN_BRIDGE,SYNCED_TIMESTAMP)
+
+    expect(result).toEqual(new Set(['0xB-tokenA','0xC-tokenC']))
   })
 })
 

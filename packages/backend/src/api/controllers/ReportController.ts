@@ -47,17 +47,17 @@ export class ReportController {
     }
   }
 
-  async filterReports(): Promise<ReportWithBalance[]> {
+  async filterReports(granularity: 'daily' | 'hourly'): Promise<ReportWithBalance[]> {
     const reports = await this.reportRepository.getDaily()
 
     const reportMax = await this.reportRepository.getMaxTimestamp()
     const maxByAssetInBridge = await this.reportRepository.getMaxByAssetInBridge()
 
-    const syncedTimestamp = getSyncedTimestamp(reportMax, maxByAssetInBridge)
+    const syncedTimestamp = getSyncedTimestamp(reportMax, maxByAssetInBridge, granularity)
     const excluded = getExcluded(maxByAssetInBridge, syncedTimestamp)
 
     return reports.filter(report => {
-      if(report.timestamp > syncedTimestamp || excluded.includes({bridge: report.bridge, asset: report.asset})) {
+      if(report.timestamp.gt(reportMax) || excluded.has(`${report.bridge}-${report.asset}`)) {
         return false
       }
       return true
@@ -272,5 +272,17 @@ export function getSyncedTimestamp(reportsMax: UnixTime, maxByAssetInBridge: Map
 
   return isOutOfSync ? reportsMax.add(-1, toSubtract) : reportsMax
 
+}
+
+export function getExcluded(maxByAssetInBridge: Map<string, UnixTime>, syncedTimestamp: UnixTime): Set<string> {
+  const result: Set<string> = new Set()
+
+  for(const [key, timestamp] of maxByAssetInBridge.entries()) {
+    if(!timestamp.equals(syncedTimestamp)) {
+      result.add(key)
+    }
+  }
+
+  return result
 }
 
