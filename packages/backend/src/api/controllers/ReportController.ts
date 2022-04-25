@@ -50,13 +50,14 @@ export class ReportController {
   async filterReports(): Promise<ReportWithBalance[]> {
     const reports = await this.reportRepository.getDaily()
 
-    const maxByProject = await this.reportRepository.getMaxByProject()
+    const reportMax = await this.reportRepository.getMaxTimestamp()
+    const maxByAssetInBridge = await this.reportRepository.getMaxByAssetInBridge()
 
-    const maxTimestamp = getMaxTimestamp(maxByProject)
-    const excludedProjects = getExcluded(maxByProject, maxTimestamp)
+    const syncedTimestamp = getSyncedTimestamp(reportMax, maxByAssetInBridge)
+    const excluded = getExcluded(maxByAssetInBridge, syncedTimestamp)
 
     return reports.filter(report => {
-      if(report.timestamp > maxTimestamp || excludedProjects.includes(report.bridge)) {
+      if(report.timestamp > syncedTimestamp || excluded.includes({bridge: report.bridge, asset: report.asset})) {
         return false
       }
       return true
@@ -77,12 +78,12 @@ export class ReportController {
       }
 
       const byTimestamp = getByTimestamp(aggregate, report)
-      aggregate.byTimestamp.set(getKey(report.timestamp), byTimestamp)
+      aggregate.byTimestamp.set(getReportDailyKey(report.timestamp), byTimestamp)
 
       const byProject = getByProject(aggregate, project, report)
       aggregate.byProject
         .get(project)
-        ?.byTimestamp.set(getKey(report.timestamp), byProject)
+        ?.byTimestamp.set(getReportDailyKey(report.timestamp), byProject)
 
       const byToken = getByToken(output, project, token, report)
       output.byProject[project].byToken[token.symbol] = byToken
@@ -112,7 +113,7 @@ function getByProject(
 ) {
   const byProject = aggregate.byProject
     .get(project)
-    ?.byTimestamp.get(getKey(report.timestamp)) ?? { usd: 0n, eth: 0n }
+    ?.byTimestamp.get(getReportDailyKey(report.timestamp)) ?? { usd: 0n, eth: 0n }
 
   return {
     usd: byProject.usd + report.usdTVL,
@@ -121,7 +122,7 @@ function getByProject(
 }
 
 function getByTimestamp(aggregate: InnerReport, report: ReportRecord) {
-  const byTimestamp = aggregate.byTimestamp.get(getKey(report.timestamp)) ?? {
+  const byTimestamp = aggregate.byTimestamp.get(getReportDailyKey(report.timestamp)) ?? {
     usd: 0n,
     eth: 0n,
   }
@@ -132,7 +133,7 @@ function getByTimestamp(aggregate: InnerReport, report: ReportRecord) {
   }
 }
 
-function getKey(timestamp: UnixTime) {
+export function getReportDailyKey(timestamp: UnixTime) {
   return SimpleDate.fromUnixTimestamp(timestamp.add(-1,'days').toNumber()).toString()
 }
 
@@ -143,14 +144,12 @@ function getByToken(
   report: ReportWithBalance
 ) {
   const byToken = output.byProject[project].byToken[token.symbol] ?? {
-    //TokenInfo.symbol
     types: ['date', token.symbol.toLocaleLowerCase(), 'usd'],
     data: [],
   }
-  //jak jest kilka pooli to sie ponadpisuje i będą zera itp
 
   byToken.data.push([
-    getKey(report.timestamp),
+    getReportDailyKey(report.timestamp),
     +asNumber(report.balance, token.decimals).toFixed(6),
     asNumber(report.usdTVL, 2),
   ])
@@ -256,6 +255,22 @@ function aggregateByToken(byToken: Chart): [string, number, number][] {
   }
 
   return result
+
+}
+
+export function getSyncedTimestamp(reportsMax: UnixTime, maxByAssetInBridge: Map<string, UnixTime>, granularity: 'daily' | 'hourly'): UnixTime {
+  
+  let isOutOfSync = false
+  const toSubtract = granularity === 'daily' ? 'days' : 'hours'
+
+
+  for(const [key, timestamp] of maxByAssetInBridge.entries()) {
+    if(!timestamp.equals(reportsMax) && timestamp.add(1,toSubtract).equals(reportsMax)) {
+      isOutOfSync = true
+    }
+  }
+
+  return isOutOfSync ? reportsMax.add(-1, toSubtract) : reportsMax
 
 }
 

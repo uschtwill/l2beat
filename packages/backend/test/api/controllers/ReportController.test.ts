@@ -11,10 +11,11 @@ import { expect, mockFn } from 'earljs'
 
 import {
   asNumber,
+  getReportDailyKey,
+  getSyncedTimestamp,
   ReportController,
 } from '../../../src/api/controllers/ReportController'
 import {
-  ReportRecord,
   ReportRepository,
   ReportWithBalance,
 } from '../../../src/peripherals/database/ReportRepository'
@@ -40,8 +41,7 @@ describe(ReportController.name, () => {
           asset: MOCK_ASSET,
           usdTVL: MOCK_USD_TVL,
           ethTVL: MOCK_ETH_TVL,
-          balance: 1000000123456n * 10n ** BigInt(18 - 6)
-
+          balance: 1000000123456n * 10n ** BigInt(18 - 6),
         },
         {
           blockNumber: START_BLOCK_NUMBER - 1000n,
@@ -50,8 +50,7 @@ describe(ReportController.name, () => {
           asset: MOCK_ASSET,
           usdTVL: MOCK_USD_TVL,
           ethTVL: MOCK_ETH_TVL,
-          balance: 1000000123456n * 10n ** BigInt(18 - 6)
-
+          balance: 1000000123456n * 10n ** BigInt(18 - 6),
         },
         {
           blockNumber: START_BLOCK_NUMBER,
@@ -60,8 +59,7 @@ describe(ReportController.name, () => {
           asset: MOCK_ASSET,
           usdTVL: MOCK_USD_TVL,
           ethTVL: MOCK_ETH_TVL,
-          balance: 1000000123456n * 10n ** BigInt(18 - 6)
-
+          balance: 1000000123456n * 10n ** BigInt(18 - 6),
         },
       ]
 
@@ -107,9 +105,9 @@ describe(ReportController.name, () => {
         aggregate: {
           types: ['date', 'usd', 'eth'],
           data: [
-            [getKey(START.add(-2, 'days')), 1000000, 0.1],
-            [getKey(START.add(-1, 'days')), 1000000, 0.1],
-            [getKey(START), 1000000, 0.1],
+            [getReportDailyKey(START.add(-2, 'days')), 1000000, 0.1],
+            [getReportDailyKey(START.add(-1, 'days')), 1000000, 0.1],
+            [getReportDailyKey(START), 1000000, 0.1],
           ],
         },
         byProject: {
@@ -118,9 +116,9 @@ describe(ReportController.name, () => {
             aggregate: {
               types: ['date', 'usd', 'eth'],
               data: [
-                [getKey(START.add(-2, 'days')), 1000000, 0.1],
-                [getKey(START.add(-1, 'days')), 1000000, 0.1],
-                [getKey(START), 1000000, 0.1],
+                [getReportDailyKey(START.add(-2, 'days')), 1000000, 0.1],
+                [getReportDailyKey(START.add(-1, 'days')), 1000000, 0.1],
+                [getReportDailyKey(START), 1000000, 0.1],
               ],
             },
             byToken: {
@@ -128,9 +126,17 @@ describe(ReportController.name, () => {
                 //TokenInfo.symbol
                 types: ['date', 'dai', 'usd'],
                 data: [
-                  [getKey(START.add(-2, 'days')), 1000000.123456, 1000000],
-                  [getKey(START.add(-1, 'days')), 1000000.123456, 1000000],
-                  [getKey(START), 1000000.123456, 1000000],
+                  [
+                    getReportDailyKey(START.add(-2, 'days')),
+                    1000000.123456,
+                    1000000,
+                  ],
+                  [
+                    getReportDailyKey(START.add(-1, 'days')),
+                    1000000.123456,
+                    1000000,
+                  ],
+                  [getReportDailyKey(START), 1000000.123456, 1000000],
                 ],
               },
             },
@@ -164,7 +170,7 @@ describe(ReportController.name, () => {
           asset: MOCK_ASSET,
           usdTVL: MOCK_USD_TVL,
           ethTVL: MOCK_ETH_TVL,
-          balance: 1000000123456n * 10n ** BigInt(18 - 6)
+          balance: 1000000123456n * 10n ** BigInt(18 - 6),
         },
         {
           blockNumber: START_BLOCK_NUMBER - 2000n,
@@ -201,7 +207,6 @@ describe(ReportController.name, () => {
           usdTVL: MOCK_USD_TVL,
           ethTVL: MOCK_ETH_TVL,
           balance: 1000000123456n * 10n ** BigInt(18 - 6),
-          
         },
         {
           blockNumber: START_BLOCK_NUMBER,
@@ -278,9 +283,9 @@ describe(ReportController.name, () => {
         aggregate: {
           types: ['date', 'usd', 'eth'],
           data: [
-            [getKey(START.add(-2, 'days')), 3000000, 0.3],
-            [getKey(START.add(-1, 'days')), 3000000, 0.3],
-            [getKey(START), 3000000, 0.3],
+            [getReportDailyKey(START.add(-2, 'days')), 3000000, 0.3],
+            [getReportDailyKey(START.add(-1, 'days')), 3000000, 0.3],
+            [getReportDailyKey(START), 3000000, 0.3],
           ],
         },
         byProject: {
@@ -289,9 +294,9 @@ describe(ReportController.name, () => {
             aggregate: {
               types: ['date', 'usd', 'eth'],
               data: [
-                [getKey(START.add(-2, 'days')), 1000000, 0.1],
-                [getKey(START.add(-1, 'days')), 1000000, 0.1],
-                [getKey(START), 1000000, 0.1],
+                [getReportDailyKey(START.add(-2, 'days')), 1000000, 0.1],
+                [getReportDailyKey(START.add(-1, 'days')), 1000000, 0.1],
+                [getReportDailyKey(START), 1000000, 0.1],
               ],
             },
             byToken: {
@@ -299,9 +304,17 @@ describe(ReportController.name, () => {
                 //TokenInfo.symbol
                 types: ['date', 'dai', 'usd'],
                 data: [
-                  [getKey(START.add(-2, 'days')), 1000000.123456, 1000000],
-                  [getKey(START.add(-1, 'days')), 1000000.123456, 1000000],
-                  [getKey(START), 1000000.123456, 1000000],
+                  [
+                    getReportDailyKey(START.add(-2, 'days')),
+                    1000000.123456,
+                    1000000,
+                  ],
+                  [
+                    getReportDailyKey(START.add(-1, 'days')),
+                    1000000.123456,
+                    1000000,
+                  ],
+                  [getReportDailyKey(START), 1000000.123456, 1000000],
                 ],
               },
             },
@@ -311,9 +324,9 @@ describe(ReportController.name, () => {
             aggregate: {
               types: ['date', 'usd', 'eth'],
               data: [
-                [getKey(START.add(-2, 'days')), 2000000, 0.2],
-                [getKey(START.add(-1, 'days')), 2000000, 0.2],
-                [getKey(START), 2000000, 0.2],
+                [getReportDailyKey(START.add(-2, 'days')), 2000000, 0.2],
+                [getReportDailyKey(START.add(-1, 'days')), 2000000, 0.2],
+                [getReportDailyKey(START), 2000000, 0.2],
               ],
             },
             byToken: {
@@ -321,9 +334,17 @@ describe(ReportController.name, () => {
                 //TokenInfo.symbol
                 types: ['date', 'uni', 'usd'],
                 data: [
-                  [getKey(START.add(-2, 'days')), 20000.123456, 2000000],
-                  [getKey(START.add(-1, 'days')), 20000.123456, 2000000],
-                  [getKey(START), 20000.123456, 2000000],
+                  [
+                    getReportDailyKey(START.add(-2, 'days')),
+                    20000.123456,
+                    2000000,
+                  ],
+                  [
+                    getReportDailyKey(START.add(-1, 'days')),
+                    20000.123456,
+                    2000000,
+                  ],
+                  [getReportDailyKey(START), 20000.123456, 2000000],
                 ],
               },
             },
@@ -353,7 +374,7 @@ describe(ReportController.name, () => {
           asset: MOCK_ASSET,
           usdTVL: MOCK_USD_TVL,
           ethTVL: MOCK_ETH_TVL,
-          balance: 1000000111111n * 10n ** BigInt(18 - 6)
+          balance: 1000000111111n * 10n ** BigInt(18 - 6),
         },
         {
           blockNumber: START_BLOCK_NUMBER - 2000n,
@@ -362,7 +383,7 @@ describe(ReportController.name, () => {
           asset: MOCK_ASSET,
           usdTVL: MOCK_USD_TVL,
           ethTVL: MOCK_ETH_TVL,
-          balance: 1000000111111n * 10n ** BigInt(18 - 6)
+          balance: 1000000111111n * 10n ** BigInt(18 - 6),
         },
         {
           blockNumber: START_BLOCK_NUMBER - 1000n,
@@ -371,7 +392,7 @@ describe(ReportController.name, () => {
           asset: MOCK_ASSET,
           usdTVL: MOCK_USD_TVL,
           ethTVL: MOCK_ETH_TVL,
-          balance: 1000000111111n * 10n ** BigInt(18 - 6)
+          balance: 1000000111111n * 10n ** BigInt(18 - 6),
         },
         {
           blockNumber: START_BLOCK_NUMBER - 1000n,
@@ -380,7 +401,7 @@ describe(ReportController.name, () => {
           asset: MOCK_ASSET,
           usdTVL: MOCK_USD_TVL,
           ethTVL: MOCK_ETH_TVL,
-          balance: 1000000111111n * 10n ** BigInt(18 - 6)
+          balance: 1000000111111n * 10n ** BigInt(18 - 6),
         },
         {
           blockNumber: START_BLOCK_NUMBER,
@@ -389,7 +410,7 @@ describe(ReportController.name, () => {
           asset: MOCK_ASSET,
           usdTVL: MOCK_USD_TVL,
           ethTVL: MOCK_ETH_TVL,
-          balance: 1000000111111n * 10n ** BigInt(18 - 6)
+          balance: 1000000111111n * 10n ** BigInt(18 - 6),
         },
         {
           blockNumber: START_BLOCK_NUMBER,
@@ -398,7 +419,7 @@ describe(ReportController.name, () => {
           asset: MOCK_ASSET,
           usdTVL: MOCK_USD_TVL,
           ethTVL: MOCK_ETH_TVL,
-          balance: 1000000111111n * 10n ** BigInt(18 - 6)
+          balance: 1000000111111n * 10n ** BigInt(18 - 6),
         },
       ]
 
@@ -449,9 +470,9 @@ describe(ReportController.name, () => {
         aggregate: {
           types: ['date', 'usd', 'eth'],
           data: [
-            [getKey(START.add(-2, 'days')), 2000000, 0.2],
-            [getKey(START.add(-1, 'days')), 2000000, 0.2],
-            [getKey(START), 2000000, 0.2],
+            [getReportDailyKey(START.add(-2, 'days')), 2000000, 0.2],
+            [getReportDailyKey(START.add(-1, 'days')), 2000000, 0.2],
+            [getReportDailyKey(START), 2000000, 0.2],
           ],
         },
         byProject: {
@@ -460,9 +481,9 @@ describe(ReportController.name, () => {
             aggregate: {
               types: ['date', 'usd', 'eth'],
               data: [
-                [getKey(START.add(-2, 'days')), 2000000, 0.2],
-                [getKey(START.add(-1, 'days')), 2000000, 0.2],
-                [getKey(START), 2000000, 0.2],
+                [getReportDailyKey(START.add(-2, 'days')), 2000000, 0.2],
+                [getReportDailyKey(START.add(-1, 'days')), 2000000, 0.2],
+                [getReportDailyKey(START), 2000000, 0.2],
               ],
             },
             byToken: {
@@ -470,9 +491,17 @@ describe(ReportController.name, () => {
                 //TokenInfo.symbol
                 types: ['date', 'dai', 'usd'],
                 data: [
-                  [getKey(START.add(-2, 'days')), 2000000.222222, 2000000],
-                  [getKey(START.add(-1, 'days')), 2000000.222222, 2000000],
-                  [getKey(START), 2000000.222222, 2000000],
+                  [
+                    getReportDailyKey(START.add(-2, 'days')),
+                    2000000.222222,
+                    2000000,
+                  ],
+                  [
+                    getReportDailyKey(START.add(-1, 'days')),
+                    2000000.222222,
+                    2000000,
+                  ],
+                  [getReportDailyKey(START), 2000000.222222, 2000000],
                 ],
               },
             },
@@ -480,6 +509,57 @@ describe(ReportController.name, () => {
         },
         experimental: {},
       })
+    })
+  })
+
+  describe(ReportController.prototype.filterReports.name, () => {
+    it('nothing to filter', async () => {
+      const START_BLOCK_NUMBER = 123456n
+      const START = UnixTime.now().toStartOf('day')
+      const MOCK_USD_TVL = 100000000n
+      const MOCK_ETH_TVL = 100000n
+      const MOCK_BALANCE = 1000000123456n * 10n ** BigInt(18 - 6)
+      const MOCK_BRIDGE = EthereumAddress.random()
+
+      const REPORTS = [
+        {
+          blockNumber: START_BLOCK_NUMBER,
+          timestamp: START,
+          bridge: EthereumAddress.random(),
+          asset: AssetId.DAI,
+          usdTVL: MOCK_USD_TVL,
+          ethTVL: MOCK_ETH_TVL,
+          balance: MOCK_BALANCE,
+        },
+        {
+          blockNumber: START_BLOCK_NUMBER,
+          timestamp: START,
+          bridge: MOCK_BRIDGE,
+          asset: AssetId.ETH,
+          usdTVL: MOCK_USD_TVL,
+          ethTVL: MOCK_ETH_TVL,
+          balance: MOCK_BALANCE,
+        },
+        {
+          blockNumber: START_BLOCK_NUMBER,
+          timestamp: START,
+          bridge: MOCK_BRIDGE,
+          asset: AssetId.USDC,
+          usdTVL: MOCK_USD_TVL,
+          ethTVL: MOCK_ETH_TVL,
+          balance: MOCK_BALANCE,
+        },
+      ]
+
+      const reportRepository = mock<ReportRepository>({
+        getDaily: mockFn().returns(REPORTS),
+      })
+
+      const reportController = new ReportController(reportRepository, [], [])
+
+      const result = await reportController.filterReports()
+
+      expect(result).toEqual(REPORTS)
     })
   })
 
@@ -528,6 +608,56 @@ describe(ReportController.name, () => {
   })
 })
 
-function getKey(timestamp: UnixTime) {
-  return SimpleDate.fromUnixTimestamp(timestamp.add(-1,'days').toNumber()).toString()
-}
+describe(getSyncedTimestamp.name, () => {
+  it('all projects synced', async () => {
+    const MAX = UnixTime.fromDate(new Date('2021-09-07T00:00:00Z'))
+
+    const MAX_BY_ASSET_IN_BRIDGE = new Map([
+      ['0xA-tokenA', MAX],
+      ['0xB-tokenA', MAX],
+      ['0xB-tokenB', MAX],
+    ])
+
+    const result = getSyncedTimestamp(MAX,MAX_BY_ASSET_IN_BRIDGE, 'daily')
+
+    expect(result).toEqual(MAX)
+  })
+
+  it('project out of sync for one day', async () => {
+    const MAX = UnixTime.fromDate(new Date('2021-09-07T00:00:00Z'))
+
+    const MAX_BY_ASSET_IN_BRIDGE = new Map([
+      ['0xA-tokenA', MAX],
+      ['0xB-tokenA', MAX.add(-1,'days')],
+      ['0xB-tokenB', MAX],
+    ])
+
+    const result = getSyncedTimestamp(MAX,MAX_BY_ASSET_IN_BRIDGE, 'daily')
+
+    expect(result).toEqual(MAX.add(-1, 'days'))
+  })
+
+  it('project out of sync for more than one day', async () => {
+    const MAX = UnixTime.fromDate(new Date('2021-09-07T00:00:00Z'))
+
+    const MAX_BY_ASSET_IN_BRIDGE = new Map([
+      ['0xA-tokenA', MAX],
+      ['0xB-tokenA', MAX.add(-200,'days')],
+      ['0xB-tokenB', MAX],
+    ])
+
+    const result = getSyncedTimestamp(MAX,MAX_BY_ASSET_IN_BRIDGE, 'daily')
+
+    expect(result).toEqual(MAX)
+  })
+})
+
+describe(getReportDailyKey.name, () => {
+  it('returns key from one day before', () => {
+    const date = UnixTime.fromDate(new Date('2021-09-07T00:00:00Z'))
+
+    const result = getReportDailyKey(date)
+
+    expect(result).toEqual('2021-09-06')
+  })
+})
