@@ -22,7 +22,7 @@ import {
 } from '../../../src/peripherals/database/ReportRepository'
 
 describe(ReportController.name, () => {
-  describe(ReportController.prototype.getDaily.name, () => {
+  describe(ReportController.prototype.buildDaily.name, () => {
     it('one token and one project', async () => {
       const START_BLOCK_NUMBER = 123456n
       const MOCK_BRIDGE = EthereumAddress(
@@ -100,7 +100,7 @@ describe(ReportController.name, () => {
         TOKENS
       )
 
-      const result = await reportController.getDaily()
+      const result = await reportController.buildDaily(DATA)
 
       expect(result).toEqual({
         aggregate: {
@@ -278,7 +278,7 @@ describe(ReportController.name, () => {
         TOKENS
       )
 
-      const result = await reportController.getDaily()
+      const result = await reportController.buildDaily(DATA)
 
       expect(result).toEqual({
         aggregate: {
@@ -465,7 +465,7 @@ describe(ReportController.name, () => {
         TOKENS
       )
 
-      const result = await reportController.getDaily()
+      const result = await reportController.buildDaily(DATA)
 
       expect(result).toEqual({
         aggregate: {

@@ -47,6 +47,14 @@ export class ReportController {
     }
   }
 
+  async getDaily() {
+    const reports = await this.filterReports('daily')
+
+    const output = await this.buildDaily(reports)
+
+    return output
+  }
+
   async filterReports(granularity: 'daily' | 'hourly'): Promise<ReportWithBalance[]> {
     const reports = await this.reportRepository.getDaily()
 
@@ -64,10 +72,9 @@ export class ReportController {
     })
   }
 
-  async getDaily(): Promise<ReportOutput> {
+  async buildDaily(reports: ReportWithBalance[]): Promise<ReportOutput> {
     const aggregate = initAggregate(this.projects)
     const output = initOutput(this.projects)
-    const reports = await this.reportRepository.getDaily()
 
     for (const report of reports) {
       const project = this.projectNameByAddress.get(report.bridge) ?? ''
