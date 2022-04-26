@@ -50,34 +50,6 @@ export class ReportRepository {
       })
   }
 
-  async getMaxByAssetInBridge(): Promise<Map<string, UnixTime>> {
-    const rows = await this.knex('reports')
-      .max('unix_timestamp')
-      .select('bridge_address', 'asset_id')
-      .groupBy('bridge_address', 'asset_id')
-
-    return new Map(
-      rows.map((r) => [
-        `${r.bridge_address}-${r.asset_id}`,
-        new UnixTime(+r.max),
-      ])
-    )
-  }
-
-  async getMaxTimestamp(): Promise<UnixTime> {
-    const sortedAndLimited = await this.knex('reports')
-      .select('unix_timestamp')
-      .orderBy('unix_timestamp', 'desc')
-      .limit(1)
-
-    const result =
-      sortedAndLimited.length > 0
-        ? new UnixTime(+sortedAndLimited[0].unix_timestamp)
-        : new UnixTime(0)
-
-    return result
-  }
-
   async getAll(): Promise<ReportRecord[]> {
     const rows = await this.knex('reports').select()
     return rows.map(toRecord)

@@ -175,35 +175,6 @@ describe(ReportRepository.name, () => {
     })
   })
 
-  describe(ReportRepository.prototype.getMaxByAssetInBridge.name, () => {
-    it('multiple project and multiple records', async () => {
-      const result = await repository.getMaxByAssetInBridge()
-
-      expect(result).toEqual(
-        new Map([
-          [`${MOCK_BRIDGE.toString()}-${MOCK_ASSET}`, START.add(1, 'hours')],
-          [`${MOCK_BRIDGE_2.toString()}-${MOCK_ASSET}`, START],
-        ])
-      )
-    })
-  })
-
-  describe(ReportRepository.prototype.getMaxTimestamp.name, () => {
-    it('retrieves max timestamp of all reports', async () => {
-      const result = await repository.getMaxTimestamp()
-
-      expect(result).toEqual(START.add(1, 'hours'))
-    })
-
-    it('returns zero if empty DB', async () => {
-      await repository.deleteAll()
-
-      const result = await repository.getMaxTimestamp()
-
-      expect(result).toEqual(new UnixTime(0))
-    })
-  })
-
   describe(ReportRepository.prototype.addOrUpdate.name, () => {
     it('new row', async () => {
       const newBridge = EthereumAddress(
