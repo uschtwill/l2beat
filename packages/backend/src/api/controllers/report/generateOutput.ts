@@ -1,12 +1,10 @@
 import { AssetId, EthereumAddress, SimpleDate, UnixTime } from '@l2beat/common'
 
-import { ProjectInfo } from '../model'
-import { Token } from '../model/Token'
-import {
-  ReportRecord,
-  ReportWithBalance,
-} from '../peripherals/database/ReportRepository'
-import { asNumber } from './asNumber'
+import { ProjectInfo } from '../../../model/ProjectInfo'
+import { Token } from '../../../model/Token'
+import { ReportRecord, ReportWithBalance } from '../../../peripherals/database/ReportRepository'
+import { asNumber } from '../../../utils/asNumber'
+
 
 export interface ReportOutput {
   aggregate: Chart

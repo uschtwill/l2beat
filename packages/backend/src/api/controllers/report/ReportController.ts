@@ -1,12 +1,12 @@
 import { UnixTime } from '@l2beat/common'
 
-import { ProjectInfo } from '../../model/ProjectInfo'
-import { Token } from '../../model/Token'
+import { ProjectInfo } from '../../../model/ProjectInfo'
+import { Token } from '../../../model/Token'
 import {
   ReportRepository,
   ReportWithBalance,
-} from '../../peripherals/database/ReportRepository'
-import { generateOutput } from '../../utils/generateOutput'
+} from '../../../peripherals/database/ReportRepository'
+import { generateOutput } from './generateOutput'
 
 export class ReportController {
   constructor(
@@ -28,7 +28,7 @@ export class ReportController {
   ): Promise<ReportWithBalance[]> {
     const reports = await this.reportRepository.getDaily()
 
-    const reportMax = await this.reportRepository.getMaxTimestamp()
+    const reportMax = reports.reduce((max, report) => report.timestamp.gt(max) ? report.timestamp : max, new UnixTime(0))
     const maxByAssetInBridge =
       await this.reportRepository.getMaxByAssetInBridge()
 
@@ -57,18 +57,18 @@ export function getSyncedTimestamp(
   granularity: 'daily' | 'hourly'
 ): UnixTime {
   let isOutOfSync = false
-  const toSubtract = granularity === 'daily' ? 'days' : 'hours'
+  const unixString = granularity === 'daily' ? 'days' : 'hours'
 
   for (const [_, timestamp] of maxByAssetInBridge.entries()) {
     if (
       !timestamp.equals(reportsMax) &&
-      timestamp.add(1, toSubtract).equals(reportsMax)
+      timestamp.add(1, unixString).equals(reportsMax)
     ) {
       isOutOfSync = true
     }
   }
 
-  return isOutOfSync ? reportsMax.add(-1, toSubtract) : reportsMax
+  return isOutOfSync ? reportsMax.add(-1, unixString) : reportsMax
 }
 
 export function getExcluded(

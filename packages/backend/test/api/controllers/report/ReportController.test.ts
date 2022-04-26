@@ -5,8 +5,8 @@ import {
   getExcluded,
   getSyncedTimestamp,
   ReportController,
-} from '../../../src/api/controllers/ReportController'
-import { ReportRepository } from '../../../src/peripherals/database/ReportRepository'
+} from '../../../../src/api/controllers/report/ReportController'
+import { ReportRepository } from '../../../../src/peripherals/database/ReportRepository'
 
 describe(ReportController.name, () => {
   describe(ReportController.prototype.getAndFilterReports.name, () => {

@@ -2,12 +2,12 @@ import { AssetId, CoingeckoId, EthereumAddress, UnixTime } from '@l2beat/common'
 import { TokenInfo } from '@l2beat/config'
 import { expect } from 'earljs'
 
-import { ProjectInfo } from '../../src/model'
-import { ReportWithBalance } from '../../src/peripherals/database/ReportRepository'
 import {
   generateOutput,
   getReportDailyKey,
-} from '../../src/utils/generateOutput'
+} from '../../../../src/api/controllers/report/generateOutput'
+import { ProjectInfo } from '../../../../src/model'
+import { ReportWithBalance } from '../../../../src/peripherals/database/ReportRepository'
 
 describe(generateOutput.name, () => {
   it('one token and one project', async () => {
