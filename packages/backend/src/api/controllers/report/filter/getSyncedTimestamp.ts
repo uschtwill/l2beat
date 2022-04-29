@@ -1,22 +1,24 @@
 import { UnixTime } from '@l2beat/common'
 
-import { ReportWithBalance } from '../../../../peripherals/database/ReportRepository'
-
 export function getSyncedTimestamp(
-  reports: ReportWithBalance[],
-  threshold: { duration: number; granularity: 'days' | 'hours' }
+  timestamps: UnixTime[],
+  granularity: 'days' | 'hours'
 ): UnixTime {
-  const maxTimestamp = reports.reduce(
-    (max, { timestamp }) => (timestamp.gt(max) ? timestamp : max),
+  const maxTimestamp = timestamps.reduce(
+    (max, current) => current.gt(max) ? current : max,
     new UnixTime(0)
   )
 
-  const allSynced = reports.every(
-    (x) =>
-      x.timestamp.equals(maxTimestamp) ||
-      x.timestamp.lt(maxTimestamp.add(-threshold.duration, threshold.granularity))
+  const allSynced = timestamps.every(
+    (timestamp) => timestamp.equals(maxTimestamp)
   )
-  return allSynced
-    ? maxTimestamp
-    : maxTimestamp.add(-threshold.duration, threshold.granularity)
+
+  if (!allSynced) {
+    const earlier = maxTimestamp.add(-1, granularity)
+    if (timestamps.some(timestamp => timestamp.equals(earlier))) {
+      return earlier
+    }
+  }
+
+  return maxTimestamp
 }
