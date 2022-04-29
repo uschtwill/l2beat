@@ -10,7 +10,7 @@ export function AssetId(value: string) {
 }
 
 AssetId.WETH = AssetId('wrapped-ether')
-AssetId.DAI = AssetId('dai-stablecoin')
+AssetId.DAI = AssetId('dai-dai-stablecoin')
 AssetId.USDT = AssetId('tether-usd')
 AssetId.USDC = AssetId('usd-coin')
 AssetId.ETH = AssetId('eth-ether')
