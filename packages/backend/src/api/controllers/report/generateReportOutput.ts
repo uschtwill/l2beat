@@ -58,7 +58,7 @@ export function generateReportOutput(entries: OutputEntry[]): ReportOutput {
         let token = project.byToken[symbol]
         if (!token) {
           token = {
-            types: ['date', symbol, 'usd'],
+            types: ['date', symbol.toLocaleLowerCase(), 'usd'],
             data: [],
           }
           project.byToken[symbol] = token

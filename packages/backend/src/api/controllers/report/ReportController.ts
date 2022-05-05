@@ -20,6 +20,5 @@ export class ReportController {
   }
 }
 
-// tests for aggregateDaliy
 // tests for generateOutput
 // check interface, mostly about experimental
