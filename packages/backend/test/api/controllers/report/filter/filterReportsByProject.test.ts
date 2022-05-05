@@ -4,16 +4,27 @@ import { expect } from 'earljs'
 
 import { filterReportsByProjects } from '../../../../../src/api/controllers/report/filter/filterReportsByProjects'
 import { ProjectInfo } from '../../../../../src/model'
-import { ReportWithBalance } from '../../../../../src/peripherals/database/ReportRepository'
 
 describe(filterReportsByProjects.name, () => {
-  const START_BLOCK_NUMBER = 123456n
-  const START = UnixTime.now().toStartOf('day')
-  const MOCK_USD_TVL = 100000000n
-  const MOCK_ETH_TVL = 100000n
-  const MOCK_BALANCE = 1000000123456n * 10n ** BigInt(18 - 6)
+  const START = 123456n
   const ARBITRUM = EthereumAddress.random()
   const OPTIMISM = EthereumAddress.random()
+
+  const mockReport = (
+    blockNumber: bigint,
+    bridge: EthereumAddress,
+    asset: AssetId
+  ) => {
+    return {
+      blockNumber: blockNumber,
+      timestamp: new UnixTime(0),
+      bridge: bridge,
+      asset: asset,
+      usdTVL: 0n,
+      ethTVL: 0n,
+      balance: 0n,
+    }
+  }
 
   const PROJECTS: ProjectInfo[] = [
     {
@@ -22,7 +33,10 @@ describe(filterReportsByProjects.name, () => {
         {
           address: ARBITRUM.toString(),
           sinceBlock: 0,
-          tokens: [getDAI(), getUSDC()],
+          tokens: [
+            mockToken(AssetId.DAI, 0),
+            mockToken(AssetId.WETH, Number(START + 1000n)),
+          ],
         },
       ],
     },
@@ -31,141 +45,67 @@ describe(filterReportsByProjects.name, () => {
       bridges: [
         {
           address: OPTIMISM.toString(),
-          sinceBlock: Number(START_BLOCK_NUMBER) + 100,
-          tokens: [getDAI()],
+          sinceBlock: Number(START + 1000n),
+          tokens: [],
         },
       ],
     },
   ]
 
-  it('refactor', async () => {
-    expect(false).toEqual(true)
-  })
-
-  it('bridge not in config', () => {
-    const reports: ReportWithBalance[] = [
-      {
-        blockNumber: START_BLOCK_NUMBER,
-        timestamp: START,
-        bridge: EthereumAddress.random(),
-        asset: AssetId.DAI,
-        usdTVL: MOCK_USD_TVL,
-        ethTVL: MOCK_ETH_TVL,
-        balance: MOCK_BALANCE,
-      },
+  it('bridge not in projects', () => {
+    const reports = [
+      mockReport(START, ARBITRUM, AssetId.DAI),
+      mockReport(START, EthereumAddress.random(), AssetId.DAI),
     ]
 
     const result = filterReportsByProjects(reports, PROJECTS)
 
-    expect(result).toEqual([])
+    expect(result).toEqual([mockReport(START, ARBITRUM, AssetId.DAI)])
   })
 
   it('token not in bridge', () => {
-    const reports: ReportWithBalance[] = [
-      {
-        blockNumber: START_BLOCK_NUMBER,
-        timestamp: START,
-        bridge: ARBITRUM,
-        asset: AssetId.DAI,
-        usdTVL: MOCK_USD_TVL,
-        ethTVL: MOCK_ETH_TVL,
-        balance: MOCK_BALANCE,
-      },
-      {
-        blockNumber: START_BLOCK_NUMBER,
-        timestamp: START,
-        bridge: ARBITRUM,
-        asset: AssetId.ETH,
-        usdTVL: MOCK_USD_TVL,
-        ethTVL: MOCK_ETH_TVL,
-        balance: MOCK_BALANCE,
-      },
+    const reports = [
+      mockReport(START, ARBITRUM, AssetId.DAI),
+      mockReport(START, ARBITRUM, AssetId('non-existing')),
     ]
 
     const result = filterReportsByProjects(reports, PROJECTS)
 
-    expect(result).toEqual([
-      {
-        blockNumber: START_BLOCK_NUMBER,
-        timestamp: START,
-        bridge: ARBITRUM,
-        asset: AssetId.DAI,
-        usdTVL: MOCK_USD_TVL,
-        ethTVL: MOCK_ETH_TVL,
-        balance: MOCK_BALANCE,
-      },
-    ])
+    expect(result).toEqual([mockReport(START, ARBITRUM, AssetId.DAI)])
   })
 
-  it('sinceBlock greater than report.blockNumber', () => {
-    const reports: ReportWithBalance[] = [
-      {
-        blockNumber: START_BLOCK_NUMBER,
-        timestamp: START,
-        bridge: ARBITRUM,
-        asset: AssetId.DAI,
-        usdTVL: MOCK_USD_TVL,
-        ethTVL: MOCK_ETH_TVL,
-        balance: MOCK_BALANCE,
-      },
-      {
-        blockNumber: START_BLOCK_NUMBER,
-        timestamp: START,
-        bridge: ARBITRUM,
-        asset: AssetId.USDC,
-        usdTVL: MOCK_USD_TVL,
-        ethTVL: MOCK_ETH_TVL,
-        balance: MOCK_BALANCE,
-      },
-      {
-        blockNumber: START_BLOCK_NUMBER,
-        timestamp: START,
-        bridge: OPTIMISM,
-        asset: AssetId.DAI,
-        usdTVL: MOCK_USD_TVL,
-        ethTVL: MOCK_ETH_TVL,
-        balance: MOCK_BALANCE,
-      },
+  it('bridge.sinceBlock > report.sinceBlock', () => {
+    const reports = [
+      mockReport(START, ARBITRUM, AssetId.DAI),
+      mockReport(START, OPTIMISM, AssetId.DAI),
     ]
 
     const result = filterReportsByProjects(reports, PROJECTS)
 
-    expect(result).toEqual([
-      {
-        blockNumber: START_BLOCK_NUMBER,
-        timestamp: START,
-        bridge: ARBITRUM,
-        asset: AssetId.DAI,
-        usdTVL: MOCK_USD_TVL,
-        ethTVL: MOCK_ETH_TVL,
-        balance: MOCK_BALANCE,
-      },
-    ])
+    expect(result).toEqual([mockReport(START, ARBITRUM, AssetId.DAI)])
   })
 
-  function getDAI(): TokenInfo {
-    return {
-      id: AssetId.DAI,
-      name: 'Dai Stablecoin',
-      coingeckoId: CoingeckoId('dai'),
-      address: EthereumAddress('0x6B175474E89094C44Da98b954EedeAC495271d0F'),
-      symbol: 'DAI',
-      decimals: 18,
-      sinceBlock: 0,
-      category: 'stablecoin',
-    }
-  }
+  it('token.sinceBlock > report.sinceBlock', () => {
+    const reports = [
+      mockReport(START, ARBITRUM, AssetId.DAI),
+      mockReport(START, ARBITRUM, AssetId.WETH),
+    ]
 
-  function getUSDC(): TokenInfo {
-    return {
-      id: AssetId('usdc-usd-coin'),
-      name: 'USD Coin',
-      coingeckoId: CoingeckoId('usd-coin'),
-      address: EthereumAddress('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'),
-      symbol: 'USDC',
-      decimals: 6,
-      sinceBlock: Number(START_BLOCK_NUMBER) + 100,
-      category: 'stablecoin',
-    }
-  }
+    const result = filterReportsByProjects(reports, PROJECTS)
+
+    expect(result).toEqual([mockReport(START, ARBITRUM, AssetId.DAI)])
+  })
 })
+
+function mockToken(assetId: AssetId, sinceBlock: number): TokenInfo {
+  return {
+    id: assetId,
+    name: '',
+    coingeckoId: CoingeckoId('-'),
+    address: EthereumAddress.random(),
+    symbol: '',
+    decimals: 18,
+    sinceBlock: sinceBlock,
+    category: 'other',
+  }
+}
