@@ -19,6 +19,3 @@ export class ReportController {
     return generateReportOutput(dailyEntries)
   }
 }
-
-// tests for generateOutput
-// check interface, mostly about experimental
