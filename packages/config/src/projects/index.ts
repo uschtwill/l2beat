@@ -34,6 +34,7 @@ import { solletBridge } from './solletBridge'
 import { synapseBridge } from './synapseBridge'
 import { hopBridge } from './hopBridge'
 import { cBridge } from './cBridge'
+import { connextBridge } from './connextBridge'
 
 export * from './types'
 
@@ -73,4 +74,5 @@ export const projects: Project[] = [
   synapseBridge,
   hopBridge,
   cBridge,
+  connextBridge,
 ]
