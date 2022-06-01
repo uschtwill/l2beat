@@ -30,12 +30,13 @@ export class StatCollector {
     endDate: SimpleDate
   ): Promise<Stats> {
     const dates = await this.projectDates.getDateRanges(projects, endDate)
-    const prices = await this.priceService.getPrices(tokenList, dates)
+    const priceDates = dates.map((x) => x.addDays(1))
+    const prices = await this.priceService.getPrices(tokenList, priceDates)
 
     const tvlEntries: TVLAnalysis[] = []
-    for (const date of dates) {
+    for (const [i, date] of dates.entries()) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const fetchedPrices = prices.get(date)!
+      const fetchedPrices = prices.get(priceDates[i])!
       const entry = await this.balanceChecker.getStatsForDate(
         projects,
         fetchedPrices,
